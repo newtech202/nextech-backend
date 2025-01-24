@@ -9,9 +9,7 @@ class UserController extends BaseController<User> {
     protected prisma = new PrismaClient()
     constructor(userService: UserService) {
         super(userService, CreateUserDTO, UpdateUserDTO)
-    }
-
-   
+    } 
 }
 
 export default UserController;  // Exportação padrão

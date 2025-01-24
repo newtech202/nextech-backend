@@ -28,7 +28,7 @@ const prisma = new PrismaClient()
 const userService = new UserService(prisma)
 class AuthController {
 
-  async sigup(req: Request, res: Response): Promise<Response> {
+  async signup(req: Request, res: Response): Promise<Response> {
     await validateData(req.body, CreateUserDTO);
     const { email, password, name } = req.body;
     const prisma = new PrismaClient()

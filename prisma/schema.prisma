@@ -1,21 +1,200 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "mysql" 
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String
-  password String
+model Empresa {
+  id           Int             @id @default(autoincrement())
+  nome         String
+  email        String          @unique
+  telefone     String
+  cnpj         String?
+  endereco     String?
+  status       String          @default("ativo") // "ativo", "inativo"
+  assinatura   Assinatura?
+  assinaturaId Int?
+  usuarios     Usuario[]
+  clientes     Cliente[]
+  fornecedores Fornecedor[]
+  documentos   Documento[]
+  despesas     Despesa[]
+  transacoes   Transacao[]
+  produtos     Produto[]
+  categorias   Categoria[]
+  pagamentos   Pagamento[]
+  notificacoes Notificacao[]
+  historicos   HistoricoAcao[]
+}
+
+model Assinatura {
+  id        Int      @id @default(autoincrement())
+  planoId   Int
+  plano     Plano    @relation(fields: [planoId], references: [id])
+  empresaId Int      @unique
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+  inicio    DateTime @default(now())
+  fim       DateTime // Período inicial gratuito
+  status    String   @default("ativo") // "ativo", "expirado"
+}
+
+model Plano {
+  id          Int          @id @default(autoincrement())
+  nome        String
+  descricao   String?
+  precoMensal Float
+  precoAnual  Float
+  empresas    Assinatura[]
+}
+
+model Usuario {
+  id        Int     @id @default(autoincrement())
+  nome      String
+  email     String  @unique
+  senha     String
+  perfilId  Int
+  perfil    Perfil  @relation(fields: [perfilId], references: [id])
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id])
+
+  HistoricoAcao        HistoricoAcao[]
+  resetPasswordToken   String? // Token para redefinição de senha
+  resetPasswordExpires DateTime? // Validade do token
+}
+
+model Perfil {
+  id        Int       @id @default(autoincrement())
+  nome      String // Exemplo: "Admin", "Usuário"
+  descricao String?
+  usuarios  Usuario[]
+}
+
+model Documento {
+  id          Int             @id @default(autoincrement())
+  tipo        String // Fatura, Nota de Crédito, etc.
+  numero      String          @unique
+  clienteId   Int
+  cliente     Cliente         @relation(fields: [clienteId], references: [id])
+  empresaId   Int
+  empresa     Empresa         @relation(fields: [empresaId], references: [id])
+  dataEmissao DateTime        @default(now())
+  valorTotal  Float
+  status      String // Pago, Pendente, etc.
+  itens       DocumentoItem[]
+  pagamentos  Pagamento[]
+}
+
+model DocumentoItem {
+  id            Int       @id @default(autoincrement())
+  documentoId   Int
+  documento     Documento @relation(fields: [documentoId], references: [id])
+  produtoId     Int?
+  produto       Produto?  @relation(fields: [produtoId], references: [id])
+  descricao     String
+  quantidade    Int
+  precoUnitario Float
+  total         Float
+}
+
+model Cliente {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  email      String      @unique
+  telefone   String
+  empresaId  Int
+  empresa    Empresa     @relation(fields: [empresaId], references: [id])
+  documentos Documento[]
+  transacoes Transacao[]
+}
+
+model Fornecedor {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  contato   String
+  empresaId Int
+  empresa   Empresa   @relation(fields: [empresaId], references: [id])
+  despesas  Despesa[]
+}
+
+model Despesa {
+  id           Int         @id @default(autoincrement())
+  descricao    String
+  valor        Float
+  data         DateTime    @default(now())
+  fornecedorId Int?
+  fornecedor   Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  empresaId    Int
+  empresa      Empresa     @relation(fields: [empresaId], references: [id])
+  categoriaId  Int
+  categoria    Categoria   @relation(fields: [categoriaId], references: [id])
+}
+
+model Transacao {
+  id        Int      @id @default(autoincrement())
+  clienteId Int
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  valor     Float
+  data      DateTime @default(now())
+  tipo      String // Crédito ou Débito
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+}
+
+model Produto {
+  id             Int             @id @default(autoincrement())
+  nome           String
+  descricao      String?
+  preco          Float
+  estoque        Int?            @default(0)
+  tipo           String // "produto" ou "serviço"
+  empresaId      Int
+  empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  categoriaId    Int
+  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
+  documentoItens DocumentoItem[]
+}
+
+model Categoria {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  descricao String?
+  empresaId Int
+  empresa   Empresa   @relation(fields: [empresaId], references: [id])
+  produtos  Produto[]
+  despesas  Despesa[]
+}
+
+model Pagamento {
+  id          Int       @id @default(autoincrement())
+  valor       Float
+  metodo      String // Exemplo: "Dinheiro", "Cartão"
+  data        DateTime  @default(now())
+  documentoId Int
+  documento   Documento @relation(fields: [documentoId], references: [id])
+  empresaId   Int
+  empresa     Empresa   @relation(fields: [empresaId], references: [id])
+}
+
+model Notificacao {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  mensagem  String
+  tipo      String // Exemplo: "assinatura", "pagamento"
+  lida      Boolean  @default(false)
+  data      DateTime @default(now())
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+}
+
+model HistoricoAcao {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  acao      String // Exemplo: "Criou Fatura"
+  data      DateTime @default(now())
+  empresaId Int
+  empresa   Empresa  @relation(fields: [empresaId], references: [id])
 }

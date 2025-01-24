@@ -26,7 +26,7 @@ userRoutes.delete('/:id', async (req, res) => {
     await userController.delete(req, res)
 });
 
-userRoutes.put('/:id', async (req, res) => {
+userRoutes.patch('/:id', async (req, res) => {
     await userController.update(req, res)
 });
 

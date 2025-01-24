@@ -48,4 +48,11 @@ export class UserService extends BaseService<User, PrismaClient> {
 
         return isValid;
     }
+
+    async updatePassword() {
+
+    }
+    async askToUpdatePassword() {
+        
+    }
 }
