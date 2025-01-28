@@ -11,7 +11,7 @@ const authRoutes = Router();
 const authController = new AuthController()
 // Definindo a rota para buscar todos os usuários
 authRoutes.post('/signin',async (req: Request, res: Response)=> {await authController.sigin(req, res)  });
-authRoutes.post('/signup',async (req: Request, res: Response)=> {await authController.sigup(req, res)  });
+authRoutes.post('/signup',async (req: Request, res: Response)=> {await authController.signup(req, res)  });
 
 
 

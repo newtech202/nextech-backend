@@ -13,10 +13,8 @@ export abstract class BaseService<T, D> {
   }
 
 
-  private async ensureRecordExists(id: number): Promise<T> {
+  public async ensureRecordExistsById(id: number): Promise<T> {
     // Verifica se o ID é um número válido
-
-
     const record = await this.repository.findById(id);
     if (!record) {
       throw new BadRequestError(`Registro com ID ${id} não encontrado.`);
@@ -24,8 +22,21 @@ export abstract class BaseService<T, D> {
     return record;
   }
 
+  public async ensureRecordExistsBy(criteria: any, message?: string): Promise<T> {
+    // Verifica se o ID é um número válido
+    const record = await this.repository.getOneBy(criteria);
+    if (!record) {
+      throw new BadRequestError(message || `Registro com o valor ${criteria} não encontrado.`);
+    }
+    return record;
+  }
+
   async getById(id: number): Promise<T> {
-    return this.ensureRecordExists(id);
+    return this.ensureRecordExistsById(id);
+  }
+
+  async getOneBy(criateria: any): Promise<T> {
+    return this.ensureRecordExistsBy(criateria);
   }
 
   async update(id: number, data: Partial<T>): Promise<T> {
@@ -33,7 +44,7 @@ export abstract class BaseService<T, D> {
       throw new BadRequestError('Nenhum dado para atualizar');
     }
     if (typeof data !== 'object') {
-      await this.ensureRecordExists(id);
+      await this.ensureRecordExistsById(id);
       throw new BadRequestError('Os dados fornecidos não são válidos');
     }
 
@@ -49,7 +60,7 @@ export abstract class BaseService<T, D> {
   }
 
   async delete(id: number): Promise<void> {
-    await this.ensureRecordExists(id);
+    await this.ensureRecordExistsById(id);
     await this.repository.delete(id);
   }
 }

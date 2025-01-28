@@ -3,31 +3,36 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql" 
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model Empresa {
-  id           Int             @id @default(autoincrement())
-  nome         String
-  email        String          @unique
-  telefone     String
-  cnpj         String?
-  endereco     String?
-  status       String          @default("ativo") // "ativo", "inativo"
-  assinatura   Assinatura?
-  assinaturaId Int?
-  usuarios     Usuario[]
-  clientes     Cliente[]
-  fornecedores Fornecedor[]
-  documentos   Documento[]
-  despesas     Despesa[]
-  transacoes   Transacao[]
-  produtos     Produto[]
-  categorias   Categoria[]
-  pagamentos   Pagamento[]
-  notificacoes Notificacao[]
-  historicos   HistoricoAcao[]
+  id             Int             @id @default(autoincrement())
+  nome           String
+  email          String          @unique
+  telefone       String
+  cnpj           String?
+  endereco       String?
+  status         String          @default("ativo") // "ativo", "inativo"
+  assinatura     Assinatura?
+  assinaturaId   Int?
+  
+  //Representa que vários usuários podem estar vinculados a uma empresa (e vice-versa), mas não como proprietários.
+  usuarios       Usuario[]       @relation("UsuarioEmpresa") // Relação com os usuários da empresa
+  clientes       Cliente[]
+  fornecedores   Fornecedor[]
+  documentos     Documento[]
+  despesas       Despesa[]
+  transacoes     Transacao[]
+  artigos       Artigo[]
+  categorias     Categoria[]
+  pagamentos     Pagamento[]
+  notificacoes   Notificacao[]
+  historicos     HistoricoAcao[]
+  proprietarioId Int
+  proprietario   Usuario         @relation("ProprietarioDaEmpresa", fields: [proprietarioId], references: [id]) // Nome da relação para o proprietário
+ 
 }
 
 model Assinatura {
@@ -51,18 +56,20 @@ model Plano {
 }
 
 model Usuario {
-  id        Int     @id @default(autoincrement())
-  nome      String
-  email     String  @unique
-  senha     String
-  perfilId  Int
-  perfil    Perfil  @relation(fields: [perfilId], references: [id])
-  empresaId Int
-  empresa   Empresa @relation(fields: [empresaId], references: [id])
-
-  HistoricoAcao        HistoricoAcao[]
-  resetPasswordToken   String? // Token para redefinição de senha
-  resetPasswordExpires DateTime? // Validade do token
+  id                Int             @id @default(autoincrement())
+  nome              String
+  email             String          @unique
+  senha             String
+  perfilId          Int?
+  perfil            Perfil?         @relation(fields: [perfilId], references: [id])
+  empresaId         Int?
+  empresas          Empresa[]       @relation("ProprietarioDaEmpresa") // Nome da relação reversa para empresas | empresas que o usuario criou
+  //Representa que vários usuários podem estar vinculados a uma empresa (e vice-versa), mas não como proprietários.
+  empresasUsuario   Empresa[]       @relation("UsuarioEmpresa") // Relação com as empresas do usuário 
+  HistoricoAcao     HistoricoAcao[]
+  resetsenhaToken   String? // Token para redefinição de senha
+  resetsenhaExpires DateTime? // Validade do token
+ 
 }
 
 model Perfil {
@@ -91,8 +98,8 @@ model DocumentoItem {
   id            Int       @id @default(autoincrement())
   documentoId   Int
   documento     Documento @relation(fields: [documentoId], references: [id])
-  produtoId     Int?
-  produto       Produto?  @relation(fields: [produtoId], references: [id])
+  artigoId     Int?
+  artigo       Artigo?  @relation(fields: [artigoId], references: [id])
   descricao     String
   quantidade    Int
   precoUnitario Float
@@ -143,7 +150,7 @@ model Transacao {
   empresa   Empresa  @relation(fields: [empresaId], references: [id])
 }
 
-model Produto {
+model Artigo {
   id             Int             @id @default(autoincrement())
   nome           String
   descricao      String?
@@ -163,7 +170,7 @@ model Categoria {
   descricao String?
   empresaId Int
   empresa   Empresa   @relation(fields: [empresaId], references: [id])
-  produtos  Produto[]
+  artigos  Artigo[]
   despesas  Despesa[]
 }
 

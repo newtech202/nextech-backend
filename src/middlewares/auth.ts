@@ -7,7 +7,7 @@ import { UserSession } from "../@types/express/session";
 interface Session {
   id: string;
   role: string;
-  name: string;
+  nome string;
   email: string;
 }
 
