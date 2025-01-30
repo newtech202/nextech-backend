@@ -11,15 +11,13 @@ export class BaseRepository<T> {
     }
 
     async findAll(criteria?: Partial<any>): Promise<T[]> {
-        return this.model.findMany({
-            where: {...criteria}
-        });
+        return this.model.findMany(criteria);
     }
     async getOneBy(criteria: any): Promise<any | null> {
-        console.log("CRITERIO",criteria);
-        
+        console.log("CRITERIO", criteria);
+
         return this.model.findFirst({
-            where: {...criteria},
+            where: { ...criteria },
         });
     }
 
@@ -52,7 +50,7 @@ export class BaseRepository<T> {
             where: { id },
             data: updatedData
         });
-        
+
     }
 
     async delete(id: number): Promise<void> {

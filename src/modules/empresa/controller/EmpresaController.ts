@@ -30,6 +30,7 @@ class EmpresaController extends BaseController<Empresa> {
         return res.status(201).json(empresa); // Retorna a empresa criada
     }
 
+    
 }
 
 export default EmpresaController;  // Exportação padrão
