@@ -22,13 +22,38 @@ export abstract class BaseService<T, D> {
     return record;
   }
 
-  public async ensureRecordExistsBy(criteria: any, message?: string): Promise<T> {
-    // Verifica se o ID é um número válido
-    const record = await this.repository.getOneBy(criteria);
-    if (!record) {
-      throw new BadRequestError(message || `Registro com o valor ${criteria} não encontrado.`);
+  public async ensureRecordExistsBy(criteria: any, {haveToexist = false}, message?: string): Promise<T> {
+    /**
+     * @param criteria: any
+     * @description: critérios de pesquisa
+     *  @param message: string
+     *  @description: mensagem de erro personalizada
+     * @default: boolean requireToexist = false
+     * @param haveToexist: boolean
+     * @description:se true, verifica se o registro existe, se false, verifica se o registro não existe.
+     * 
+     */
+    if (!criteria) {
+      throw new BadRequestError('Nenhum critério de pesquisa fornecido');
+    }
+
+    if (typeof criteria !== 'object') {
+      throw new BadRequestError('Os critérios fornecidos não são válidos');
+    }
+    if (haveToexist) {
+      const record = await this.repository.getOneBy({ ...criteria });
+      if (!record) {
+        throw new BadRequestError(message || `Registro com o valor ${criteria} não encontrado.`);
+      }
+      return record;
+    }
+    const record = await this.repository.getOneBy({ ...criteria });
+    if (record) {
+      throw new BadRequestError(message || `Registro com o valor ${criteria} já existe.`);
     }
     return record;
+
+
   }
 
   async getById(id: number): Promise<T> {
@@ -36,7 +61,7 @@ export abstract class BaseService<T, D> {
   }
 
   async getOneBy(criateria: any): Promise<T> {
-    return this.ensureRecordExistsBy(criateria);
+    return this.ensureRecordExistsBy(criateria, {haveToexist: true});
   }
 
   async update(id: number, data: Partial<T>): Promise<T> {

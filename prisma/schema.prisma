@@ -7,201 +7,183 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Empresa {
-  id             Int             @id @default(autoincrement())
-  nome           String
-  email          String          @unique
-  telefone       String
-  cnpj           String?
-  endereco       String?
-  status         String          @default("ativo") // "ativo", "inativo"
-  assinatura     Assinatura?
-  assinaturaId   Int?
-  
-  //Representa que vários usuários podem estar vinculados a uma empresa (e vice-versa), mas não como proprietários.
-  usuarios       Usuario[]       @relation("UsuarioEmpresa") // Relação com os usuários da empresa
-  clientes       Cliente[]
-  fornecedores   Fornecedor[]
-  documentos     Documento[]
-  despesas       Despesa[]
-  transacoes     Transacao[]
-  artigos       Artigo[]
-  categorias     Categoria[]
-  pagamentos     Pagamento[]
-  notificacoes   Notificacao[]
-  historicos     HistoricoAcao[]
-  proprietarioId Int
-  proprietario   Usuario         @relation("ProprietarioDaEmpresa", fields: [proprietarioId], references: [id]) // Nome da relação para o proprietário
- 
+model Artigo {
+  id              Int         @id @default(autoincrement())
+  nome            String
+  preco           Float
+  categoria       String
+  impostoAplicado Float
+  tipo            ArtigoTipo
+  descricao       String
+  imagemUrl       String?
+  empresaId       Int
+  empresa         Empresa     @relation(fields: [empresaId], references: [id], map: "Artigo_empresaId_fkey")
+  documento       Documento[]
+
+  @@index([empresaId], map: "Artigo_empresaId_fkey")
 }
 
-model Assinatura {
-  id        Int      @id @default(autoincrement())
-  planoId   Int
-  plano     Plano    @relation(fields: [planoId], references: [id])
-  empresaId Int      @unique
-  empresa   Empresa  @relation(fields: [empresaId], references: [id])
-  inicio    DateTime @default(now())
-  fim       DateTime // Período inicial gratuito
-  status    String   @default("ativo") // "ativo", "expirado"
+model Cliente {
+  id          Int         @id @default(autoincrement())
+  nome        String
+  telefone    String
+  email       String
+  endereco    String
+  empresaId   Int
+  dataCriacao DateTime    @default(now())
+  empresa     Empresa     @relation(fields: [empresaId], references: [id], map: "Cliente_empresaId_fkey")
+  documento   Documento[]
+
+  @@index([empresaId], map: "Cliente_empresaId_fkey")
+}
+
+model Despesa {
+  id            Int            @id @default(autoincrement())
+  comprovativo  String?
+  nome          String
+  valor         Float
+  fornecedorId  Int
+  retencaoFonte Boolean
+  motivo        DespesaMotivo
+  criadoPor     String
+  empresaId     Int
+  dataCriacao   DateTime       @default(now())
+  empresa       Empresa        @relation(fields: [empresaId], references: [id], map: "Despesa_empresaId_fkey")
+  fornecedor    Fornecedor     @relation(fields: [fornecedorId], references: [id], map: "Despesa_fornecedorId_fkey")
+
+  @@index([empresaId], map: "Despesa_empresaId_fkey")
+  @@index([fornecedorId], map: "Despesa_fornecedorId_fkey")
+}
+
+model Documento {
+  id                 Int      @id @default(autoincrement())
+  clienteId          Int
+  empresaId          Int
+  dataEmissao        DateTime @default(now())
+  produtoServicoId   Int
+  precoUnitario      Float
+  quantidade         Int
+  totalLiquido       Float
+  totalImpostos      Float
+  impostosRetidos    Float
+  total              Float
+  descontoPercentual Float
+  dataCriacao        DateTime @default(now())
+  criadoPor          String
+  cliente            Cliente  @relation(fields: [clienteId], references: [id], map: "Documento_clienteId_fkey")
+  empresa            Empresa  @relation(fields: [empresaId], references: [id], map: "Documento_empresaId_fkey")
+  artigo             Artigo   @relation(fields: [produtoServicoId], references: [id], map: "Documento_produtoServicoId_fkey")
+
+  @@index([clienteId], map: "Documento_clienteId_fkey")
+  @@index([empresaId], map: "Documento_empresaId_fkey")
+  @@index([produtoServicoId], map: "Documento_produtoServicoId_fkey")
+}
+
+model Empresa {
+  id                  Int                   @id @default(autoincrement())
+  nome                String
+  dataCriacao         DateTime              @default(now())
+  email               String
+  logoURL             String?
+  nif                 String                @unique(map: "Empresa_nif_key")
+  telefone            String
+  artigo              Artigo[]
+  cliente             Cliente[]
+  despesa             Despesa[]
+  documento           Documento[]
+  planoId             Int
+  plano               Plano                 @relation(fields: [planoId], references: [id], map: "Empresa_planoId_fkey")
+  fornecedor          Fornecedor[]
+  pagamentoSubscricao PagamentoSubscricao[]
+  usuario             Usuario[]
+  endereco            String
+  @@index([planoId], map: "Empresa_planoId_fkey")
+
+}
+
+model Fornecedor {
+  id          Int       @id @default(autoincrement())
+  logo        String?
+  nome        String
+  nif         String    @unique(map: "Fornecedor_nif_key")
+  endereco    String
+  telefone    String
+  email       String
+  empresaId   Int
+  dataCriacao DateTime  @default(now())
+  despesa     Despesa[]
+  empresa     Empresa   @relation(fields: [empresaId], references: [id], map: "Fornecedor_empresaId_fkey")
+
+  @@index([empresaId], map: "Fornecedor_empresaId_fkey")
+}
+
+model PagamentoSubscricao {
+  id              Int                                 @id @default(autoincrement())
+  empresaId       Int
+  planoId         Int
+  dataPagamento   DateTime                            @default(now())
+  valor           Float
+  statusPagamento PagamentoSubscricaoStatus
+  empresa         Empresa                             @relation(fields: [empresaId], references: [id], map: "PagamentoSubscricao_empresaId_fkey")
+  plano           Plano                               @relation(fields: [planoId], references: [id], map: "PagamentoSubscricao_planoId_fkey")
+
+  @@index([empresaId], map: "PagamentoSubscricao_empresaId_fkey")
+  @@index([planoId], map: "PagamentoSubscricao_planoId_fkey")
 }
 
 model Plano {
-  id          Int          @id @default(autoincrement())
-  nome        String
-  descricao   String?
-  precoMensal Float
-  precoAnual  Float
-  empresas    Assinatura[]
+  id                  Int                   @id @default(autoincrement())
+  nome                String
+  valor               Float
+  periodo             String
+  dataCriacao         DateTime              @default(now())
+  empresa             Empresa[]
+  pagamentoSubscricao PagamentoSubscricao[]
 }
 
 model Usuario {
-  id                Int             @id @default(autoincrement())
+  id                Int       @id @default(autoincrement())
   nome              String
-  email             String          @unique
+  email             String    @unique(map: "Usuario_email_key")
   senha             String
-  perfilId          Int?
-  perfil            Perfil?         @relation(fields: [perfilId], references: [id])
   empresaId         Int?
-  empresas          Empresa[]       @relation("ProprietarioDaEmpresa") // Nome da relação reversa para empresas | empresas que o usuario criou
-  //Representa que vários usuários podem estar vinculados a uma empresa (e vice-versa), mas não como proprietários.
-  empresasUsuario   Empresa[]       @relation("UsuarioEmpresa") // Relação com as empresas do usuário 
-  HistoricoAcao     HistoricoAcao[]
-  resetsenhaToken   String? // Token para redefinição de senha
-  resetsenhaExpires DateTime? // Validade do token
+  dataCriacao       DateTime  @default(now())
+  perfilId          Int
+  resetsenhaToken   String?   @unique
+  resetsenhaExpires DateTime?
+  empresa           Empresa?   @relation(fields: [empresaId], references: [id], map: "Usuario_empresaId_fkey")
+  perfil            Perfil    @relation(fields: [perfilId], references: [id], map: "Usuario_perfilId_fkey")
+
  
+  @@index([perfilId], map: "Usuario_perfilId_fkey")
 }
 
 model Perfil {
   id        Int       @id @default(autoincrement())
-  nome      String // Exemplo: "Admin", "Usuário"
-  descricao String?
-  usuarios  Usuario[]
-}
-
-model Documento {
-  id          Int             @id @default(autoincrement())
-  tipo        String // Fatura, Nota de Crédito, etc.
-  numero      String          @unique
-  clienteId   Int
-  cliente     Cliente         @relation(fields: [clienteId], references: [id])
-  empresaId   Int
-  empresa     Empresa         @relation(fields: [empresaId], references: [id])
-  dataEmissao DateTime        @default(now())
-  valorTotal  Float
-  status      String // Pago, Pendente, etc.
-  itens       DocumentoItem[]
-  pagamentos  Pagamento[]
-}
-
-model DocumentoItem {
-  id            Int       @id @default(autoincrement())
-  documentoId   Int
-  documento     Documento @relation(fields: [documentoId], references: [id])
-  artigoId     Int?
-  artigo       Artigo?  @relation(fields: [artigoId], references: [id])
-  descricao     String
-  quantidade    Int
-  precoUnitario Float
-  total         Float
-}
-
-model Cliente {
-  id         Int         @id @default(autoincrement())
-  nome       String
-  email      String      @unique
-  telefone   String
-  empresaId  Int
-  empresa    Empresa     @relation(fields: [empresaId], references: [id])
-  documentos Documento[]
-  transacoes Transacao[]
-}
-
-model Fornecedor {
-  id        Int       @id @default(autoincrement())
   nome      String
-  contato   String
-  empresaId Int
-  empresa   Empresa   @relation(fields: [empresaId], references: [id])
-  despesas  Despesa[]
+  descricao String
+  usuario   Usuario[]
 }
 
-model Despesa {
-  id           Int         @id @default(autoincrement())
-  descricao    String
-  valor        Float
-  data         DateTime    @default(now())
-  fornecedorId Int?
-  fornecedor   Fornecedor? @relation(fields: [fornecedorId], references: [id])
-  empresaId    Int
-  empresa      Empresa     @relation(fields: [empresaId], references: [id])
-  categoriaId  Int
-  categoria    Categoria   @relation(fields: [categoriaId], references: [id])
+enum ArtigoTipo {
+  PRODUTO
+  SERVICO
+  SERVICO_COM_RETENCAO_6_5
+  ARRENDAMENTO
+  ARRENDAMENTO_COM_RETENCAO_15
 }
 
-model Transacao {
-  id        Int      @id @default(autoincrement())
-  clienteId Int
-  cliente   Cliente  @relation(fields: [clienteId], references: [id])
-  valor     Float
-  data      DateTime @default(now())
-  tipo      String // Crédito ou Débito
-  empresaId Int
-  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+enum PagamentoSubscricaoStatus {
+  PENDENTE
+  CONCLUIDO
+  CANCELADO
 }
 
-model Artigo {
-  id             Int             @id @default(autoincrement())
-  nome           String
-  descricao      String?
-  preco          Float
-  estoque        Int?            @default(0)
-  tipo           String // "produto" ou "serviço"
-  empresaId      Int
-  empresa        Empresa         @relation(fields: [empresaId], references: [id])
-  categoriaId    Int
-  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
-  documentoItens DocumentoItem[]
-}
-
-model Categoria {
-  id        Int       @id @default(autoincrement())
-  nome      String
-  descricao String?
-  empresaId Int
-  empresa   Empresa   @relation(fields: [empresaId], references: [id])
-  artigos  Artigo[]
-  despesas  Despesa[]
-}
-
-model Pagamento {
-  id          Int       @id @default(autoincrement())
-  valor       Float
-  metodo      String // Exemplo: "Dinheiro", "Cartão"
-  data        DateTime  @default(now())
-  documentoId Int
-  documento   Documento @relation(fields: [documentoId], references: [id])
-  empresaId   Int
-  empresa     Empresa   @relation(fields: [empresaId], references: [id])
-}
-
-model Notificacao {
-  id        Int      @id @default(autoincrement())
-  titulo    String
-  mensagem  String
-  tipo      String // Exemplo: "assinatura", "pagamento"
-  lida      Boolean  @default(false)
-  data      DateTime @default(now())
-  empresaId Int
-  empresa   Empresa  @relation(fields: [empresaId], references: [id])
-}
-
-model HistoricoAcao {
-  id        Int      @id @default(autoincrement())
-  usuarioId Int
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  acao      String // Exemplo: "Criou Fatura"
-  data      DateTime @default(now())
-  empresaId Int
-  empresa   Empresa  @relation(fields: [empresaId], references: [id])
+enum DespesaMotivo {
+  COMPRA_PRODUTO
+  PAGAMENTO_SERVICO
+  DESPESA_INTERNA
+  AMORTIZACOES
+  PAGAMENTO_CREDITO
+  DESPESAS_BANCARIAS
 }

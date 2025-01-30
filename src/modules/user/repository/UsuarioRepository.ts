@@ -1,4 +1,4 @@
-import { PrismaClient, Usuario } from '@prisma/client';
+import { PrismaClient, Usuario, } from '@prisma/client';
 import { BaseRepository } from '../../../core/repositories/base.repository';
 
 type UsuarioData = {
@@ -6,8 +6,8 @@ type UsuarioData = {
     email: string;
     senha: string;
     empresaId: number;
-    perfilId?: number;
-    perfil: any;
+    perfilId: number;
+ 
 }
 export class UsuarioRepository extends BaseRepository<Usuario> {
     constructor(prisma: PrismaClient) {
@@ -23,7 +23,9 @@ export class UsuarioRepository extends BaseRepository<Usuario> {
                     nome: data.nome,
                     email: data.email,
                     senha: data.senha,
-                    perfilId: data.perfilId,
+                    empresaId: data.empresaId,
+                    perfilId: data?.perfilId,
+
                     // Outros campos podem ser adicionados conforme necessário
 
                 }

@@ -3,9 +3,10 @@ import * as bcrypt from 'bcrypt';
 import { BadRequestError } from '../../../core/helpers/api.errors';
 import { validateData } from '../../../core/helpers/validate-data.dtos';
 import { BaseService } from '../../../core/services/BaseServices';
+import { SignupDTO, SignupDTOType } from '../../auth/DTO/SignupDTO';
+import { EmpresaService } from '../../empresa/services/EmpresaServices';
 import { PerfilService } from '../../perfil/services/PerfilServices';
 import { CriarUsuarioDTO, CriarUsuarioDTOType } from '../DTO/criarUsuarioDTO';
-import { CriarUsuarioNoCadastroDTOType } from '../DTO/criarUsuarioNoCadastroDTO';
 import { UsuarioRepository } from '../repository/UsuarioRepository';
 
 
@@ -20,7 +21,7 @@ export class UsuarioService extends BaseService<Usuario, PrismaClient> {
         return Math.random().toString(36).slice(-8);
     }
 
-    async create(data: CriarUsuarioDTOType, perfilService: PerfilService,): Promise<Usuario> {
+    async create(data: CriarUsuarioDTOType, perfilService: PerfilService, empresaService: EmpresaService): Promise<Usuario> {
         const { email, nome, perfilId, empresaId } = data
         await validateData(data, CriarUsuarioDTO);
 
@@ -34,6 +35,11 @@ export class UsuarioService extends BaseService<Usuario, PrismaClient> {
             throw new BadRequestError("Perfil não existe")
         }
 
+        const empresa = await empresaService.getById(empresaId);
+        if (!empresa) {
+            throw new BadRequestError("Empresa não existe")
+        }
+
         // Criptografando a senha
         const hashedsenha = await bcrypt.hash(this.randomPassword(), 10); // 10 é o número de saltos (aumentar aumenta a segurança)
 
@@ -45,9 +51,9 @@ export class UsuarioService extends BaseService<Usuario, PrismaClient> {
 
         return newUsuario
     }
-    async createOnSignup(data: CriarUsuarioNoCadastroDTOType, perfilService: PerfilService,): Promise<Usuario> {
+    async Signup(data:  SignupDTOType, perfilService: PerfilService,): Promise<Usuario> {
         const { email, nome, perfilId, senha } = data
-        await validateData(data, CriarUsuarioDTO);
+        await validateData(data, SignupDTO);
 
         const usuarioExist = this.getByEmail(email);
         if ((await usuarioExist)?.id) {
@@ -64,7 +70,9 @@ export class UsuarioService extends BaseService<Usuario, PrismaClient> {
 
         // Criando um novo usuário com a senha criptografada
         const newUsuario = await this.repository.create({
-            ...data,
+            nome,
+            email,
+            perfilId,
             senha: hashedsenha,
         });
 

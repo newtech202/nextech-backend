@@ -13,13 +13,18 @@ const swaggerOptions: Options = {
     },
     servers: [
       {
+  
         url: isDevelopment
-          ? "http://localhost:4400" // URL base da API em desenvolvimento
-          : "https://api.nextech.com", // URL base da API em produção (exemplo)
+        ? 
+        "https://api.nextech.com/v1/":"http://localhost:4400/v1/" // URL base da API em desenvolvimento, // URL base da API em produção (exemplo)
       },
     ],
   },
-  apis: ["./src/routes/**/*.ts"], // Caminho dos arquivos que contêm as rotas
+  apis:
+   [
+    "./src/routes/**/*.ts", // Rotas gerais
+    "./src/modules/**/routes/*.ts"
+  ] // Rotas dentro dos módulos// Caminho dos arquivos que contêm as rotas
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);

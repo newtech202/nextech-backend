@@ -7,10 +7,11 @@ import '../../../config/yup';
 import { UnauthorizedError } from "../../../core/helpers/api.errors";
 import { validateData } from "../../../core/helpers/validate-data.dtos";
 
+import { EmpresaService } from "../../empresa/services/EmpresaServices";
 import { PerfilService } from "../../perfil/services/PerfilServices";
-import { CriarUsuarioDTO } from "../../user/DTO/criarUsuarioDTO";
 import { UsuarioService } from "../../user/services/UsuarioServices";
 import { SigninDTO } from "../DTO/SiginDTO";
+import { SignupDTO } from "../DTO/SignupDTO";
 // Definindo a interface para o usuário
 interface IUsuario {
   id: number;
@@ -31,16 +32,18 @@ interface ILoginRequestBody {
 
 const prisma = new PrismaClient()
 const usuarioService = new UsuarioService(prisma)
+const empresaService = new EmpresaService(prisma)
 class AuthController {
 
   async signup(req: Request, res: Response): Promise<Response> {
-    await validateData(req.body, CriarUsuarioDTO);
-    const { email, senha, nome, perfilId, empresaId } = req.body;
+    await validateData(req.body, SignupDTO);
+
+    const { email, senha, nome, perfilId } = req.body;
     const prisma = new PrismaClient()
     const usuarioService = new UsuarioService(prisma)
     const perfilService = new PerfilService(prisma)
 
-    const novoUsuario = await usuarioService.createOnSignup(
+    const novoUsuario = await usuarioService.Signup(
       {
         email,
         senha,

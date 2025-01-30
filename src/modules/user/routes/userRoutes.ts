@@ -15,7 +15,20 @@ const userController = new UserController(usuarioService);
 
 // Criando o roteador
 const userRoutes = Router();
-userController.getAll
+ /**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Lista todas os usuarios
+ *     description: Retorna uma lista de todas as empresas cadastradas.
+ *     tags:
+ *       - Usuários
+ *     responses:
+ *       200:
+ *         description: Lista de empresas retornada com sucesso
+ *       500:
+ *         description: Erro interno do servidor
+ */
 // Definindo a rota para buscar todos os usuários
 userRoutes.get('/', async (req, res) => {
     await userController.getAll(req, res)

@@ -1,10 +1,9 @@
 import { Empresa, PrismaClient } from "@prisma/client";
-import { BaseController } from "../../../core/controllers/base.controller";
-import { CriarEmpresaDTO } from "../DTO/criarEmpresaDTO";
-
 import { Request, Response } from "express";
-import { UsuarioService } from "../../user/services/UsuarioServices";
+import { BaseController } from "../../../core/controllers/base.controller";
+import { PlanoService } from "../../Plano/services/PlanoServices";
 import { ActualizarEmpresaDTO } from "../DTO/actualizarEmpresaDTO";
+import { CriarEmpresaDTO } from "../DTO/criarEmpresaDTO";
 import { EmpresaService } from "../services/EmpresaServices";
 
 
@@ -12,7 +11,6 @@ class EmpresaController extends BaseController<Empresa> {
 
     private empresaService: EmpresaService
     protected prisma = new PrismaClient()
-    private proprietarioService = new UsuarioService(this.prisma)
 
     constructor(empresaService: EmpresaService) {
         super(empresaService, CriarEmpresaDTO, ActualizarEmpresaDTO)
@@ -21,16 +19,14 @@ class EmpresaController extends BaseController<Empresa> {
 
     async create(req: Request, res: Response) {
 
-        const { nome, email, telefone, nif, endereco, proprietarioId } = req.body;
+        const { nome, email, nif, telefone, endereco, regimeIvaId, logoURL, planoId } = req.body;
+        const planoService = new PlanoService(this.prisma); // Create an instance of PlanoService
         const empresa = await this.empresaService.create({
-            nome,
-            email,
-            telefone,
-            nif,
-            endereco,
-            proprietarioId
+            nome, email, nif, endereco, telefone, regimeIvaId, logoURL,
+            planoId
+
         },
-            this.proprietarioService);
+            planoService);
         return res.status(201).json(empresa); // Retorna a empresa criada
     }
 

@@ -1,7 +1,7 @@
 import { Empresa, PrismaClient } from "@prisma/client";
 import { validateData } from "../../../core/helpers/validate-data.dtos";
 import { BaseService } from "../../../core/services/BaseServices";
-import { UsuarioService } from "../../user/services/UsuarioServices";
+import { PlanoService } from "../../Plano/services/PlanoServices";
 import { CriarEmpresaDTO, CriarEmpresaDTOType } from "../DTO/criarEmpresaDTO";
 import { EmpresaRepository } from "../repository/EmpresaRepository";
 
@@ -11,28 +11,38 @@ export class EmpresaService extends BaseService<Empresa, PrismaClient> {
         super(empresaRepository);
     }
 
-    async create(data: CriarEmpresaDTOType, proprientarioService: UsuarioService): Promise<Empresa> {
+    async create(data: CriarEmpresaDTOType, planoService: PlanoService): Promise<Empresa> {
         const {
-            nome,
             email,
-            telefone,
-            nif,
             endereco,
-            proprietarioId } = data;
+            nif,
+            nome,
+            planoId,
+            telefone,
+            regimeIvaId,
+            logoURL
+        } = data;
 
         // Validar os campos obrigatórios
         await validateData(data, CriarEmpresaDTO);
 
-        // Verificar se já existe uma empresa com o mesmo email ou NIF
-        await this.ensureRecordExistsBy(email, "Já existe uma empresa com este email.");
-        await this.ensureRecordExistsBy(nif, "Já existe uma empresa com este NIF.");
+        // Verificar se já existe uma empresa com o mesmo dados
+        await this.ensureRecordExistsBy({ email }, { haveToexist: false }, "Já existe uma empresa com este email.");
+        await this.ensureRecordExistsBy({ nif }, { haveToexist: false }, "Já existe uma empresa com este NIF.");
+        await this.ensureRecordExistsBy({ nome }, { haveToexist: false }, "Já existe uma empresa com este nome.");
+        await this.ensureRecordExistsBy({ telefone }, { haveToexist: false }, "Já existe uma empresa com este telefone.");
+        
+        // Verificar se nao existe um plano com referido id
+        const plano = await planoService.getById(planoId);
+        const novaEmpresa = await this.repository.create( {
+            email,
+            endereco,
+            nif,
+            nome,
+            telefone,
+            logoURL,
+            planoId,
 
-        // Verificar se o proprietário existe
-        await proprientarioService.ensureRecordExistsBy(proprietarioId, "Proprietário não encontrado.");
-
-        // Criar a empresa
-        const novaEmpresa = await this.repository.create({
-            ...data,
         });
         return novaEmpresa;
     }

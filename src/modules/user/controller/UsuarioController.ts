@@ -1,6 +1,7 @@
 import { PrismaClient, Usuario } from "@prisma/client";
 import { Request, Response } from "express";
 import { BaseController } from "../../../core/controllers/base.controller";
+import { EmpresaService } from "../../empresa/services/EmpresaServices";
 import { PerfilService } from "../../perfil/services/PerfilServices";
 import { ActualizarUsuarioDTO } from "../DTO/actualizarUsuarioDTO";
 import { CriarUsuarioDTO } from "../DTO/criarUsuarioDTO";
@@ -19,10 +20,10 @@ class UsuarioController extends BaseController<Usuario> {
         const { nome, email, perfilId, empresaId } = req.body;
 
         const perfilService = new PerfilService(this.prisma);
-
+        const empresaService = new EmpresaService(this.prisma);
         const usuario = await this.usuarioService.create(
             { nome, email, perfilId, empresaId },
-            perfilService);
+            perfilService, empresaService);
 
         return res.status(201).json(usuario);
 
