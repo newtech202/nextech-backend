@@ -38,7 +38,7 @@ model Cliente {
 }
 
 model Despesa {
-  id            Int            @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   comprovativo  String?
   nome          String
   valor         Float
@@ -47,9 +47,9 @@ model Despesa {
   motivo        DespesaMotivo
   criadoPor     String
   empresaId     Int
-  dataCriacao   DateTime       @default(now())
-  empresa       Empresa        @relation(fields: [empresaId], references: [id], map: "Despesa_empresaId_fkey")
-  fornecedor    Fornecedor     @relation(fields: [fornecedorId], references: [id], map: "Despesa_fornecedorId_fkey")
+  dataCriacao   DateTime      @default(now())
+  empresa       Empresa       @relation(fields: [empresaId], references: [id], map: "Despesa_empresaId_fkey")
+  fornecedor    Fornecedor    @relation(fields: [fornecedorId], references: [id], map: "Despesa_fornecedorId_fkey")
 
   @@index([empresaId], map: "Despesa_empresaId_fkey")
   @@index([fornecedorId], map: "Despesa_fornecedorId_fkey")
@@ -97,8 +97,9 @@ model Empresa {
   pagamentoSubscricao PagamentoSubscricao[]
   usuario             Usuario[]
   endereco            String
-  @@index([planoId], map: "Empresa_planoId_fkey")
 
+  @@index([planoId], map: "Empresa_planoId_fkey")
+  Categoria Categoria[] @relation(map: "Categoria_empresaId_fkey")
 }
 
 model Fornecedor {
@@ -118,14 +119,14 @@ model Fornecedor {
 }
 
 model PagamentoSubscricao {
-  id              Int                                 @id @default(autoincrement())
+  id              Int                       @id @default(autoincrement())
   empresaId       Int
   planoId         Int
-  dataPagamento   DateTime                            @default(now())
+  dataPagamento   DateTime                  @default(now())
   valor           Float
   statusPagamento PagamentoSubscricaoStatus
-  empresa         Empresa                             @relation(fields: [empresaId], references: [id], map: "PagamentoSubscricao_empresaId_fkey")
-  plano           Plano                               @relation(fields: [planoId], references: [id], map: "PagamentoSubscricao_planoId_fkey")
+  empresa         Empresa                   @relation(fields: [empresaId], references: [id], map: "PagamentoSubscricao_empresaId_fkey")
+  plano           Plano                     @relation(fields: [planoId], references: [id], map: "PagamentoSubscricao_planoId_fkey")
 
   @@index([empresaId], map: "PagamentoSubscricao_empresaId_fkey")
   @@index([planoId], map: "PagamentoSubscricao_planoId_fkey")
@@ -151,10 +152,9 @@ model Usuario {
   perfilId          Int
   resetsenhaToken   String?   @unique
   resetsenhaExpires DateTime?
-  empresa           Empresa?   @relation(fields: [empresaId], references: [id], map: "Usuario_empresaId_fkey")
+  empresa           Empresa?  @relation(fields: [empresaId], references: [id], map: "Usuario_empresaId_fkey")
   perfil            Perfil    @relation(fields: [perfilId], references: [id], map: "Usuario_perfilId_fkey")
 
- 
   @@index([perfilId], map: "Usuario_perfilId_fkey")
 }
 
@@ -177,6 +177,15 @@ enum PagamentoSubscricaoStatus {
   PENDENTE
   CONCLUIDO
   CANCELADO
+}
+
+model Categoria {
+  id        Int    @id @default(autoincrement())
+  nome      String
+  descricao String
+  empresaId Int
+  empresa   Empresa @relation(fields: [empresaId], references: [id], map: "Categoria_empresaId_fkey")
+  @@index([empresaId], map: "Categoria_empresaId_fkey")
 }
 
 enum DespesaMotivo {
