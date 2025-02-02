@@ -1,5 +1,6 @@
 import { Empresa, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import session from "express-session";
 import { BaseController } from "../../../core/controllers/base.controller";
 import { PlanoService } from "../../Plano/services/PlanoServices";
 import { ActualizarEmpresaDTO } from "../DTO/actualizarEmpresaDTO";
@@ -30,7 +31,12 @@ class EmpresaController extends BaseController<Empresa> {
         return res.status(201).json(empresa); // Retorna a empresa criada
     }
 
-    
+    async findExpensesByCompanyId(req: Request, res: Response) {
+        (req as Request & { session: session.Session }).session
+        const userId = req.session?.id 
+
+        return res.status(200).json({ userId });
+    }
 }
 
 export default EmpresaController;  // Exportação padrão

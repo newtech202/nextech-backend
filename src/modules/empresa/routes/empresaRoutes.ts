@@ -34,6 +34,9 @@ empresaRoutes.patch('/:id', async (req, res) => {
     await empresaController.update(req, res)
 });
 
+empresaRoutes.get('/:id/expensives', async (req, res) => {
+    await empresaController.findExpensesByCompanyId(req, res)
+});
 
 export { empresaRoutes };
 
