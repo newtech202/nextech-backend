@@ -1,7 +1,7 @@
 // src/types/session.d.ts
 export interface UserSession {
     id: string;
-    name: string;
+    nome string;
     email: string;
     role: string;
 }

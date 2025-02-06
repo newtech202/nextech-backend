@@ -1,13 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { promisify } from "util";
-import { UserSession } from "../@types/express/session";
-
+import auth from "../config/auth";
+ declare module "express-serve-static-core" {
+  interface Request {
+    session?: Session;
+  }
+}
 // Definindo a tipagem para a sessão
 interface Session {
   id: string;
   role: string;
-  name: string;
+  nome: string;
   email: string;
 }
 
@@ -30,16 +33,21 @@ export default async (
   const [, token] = authHeader.split(" ");
 
   try {
+    // Verifica se a chave secreta está disponível
+    const secretKey = process.env.JWT_SECRET;
+    if (!secretKey) {
+      return res.status(500).json({ erro: "Chave secreta não configurada!" });
+    }
     // Decodifica o token JWT de forma assíncrona
-    const decoded: unknown = await promisify(jwt.verify)(
-      token,
-    );
+    const decoded = await jwt.verify(token, auth.secret) as Session;
 
     // Tipando os dados decodificados do token
-    const userSession: UserSession = decoded as UserSession
+    const userSession: Session = decoded;
 
     // Atribui os dados da sessão ao objeto req.sessao
-    req.session = userSession
+    req.session = userSession;
+    console.log(userSession);
+    
 
 
     return next();
