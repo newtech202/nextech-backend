@@ -6,37 +6,52 @@ import authConfig from "../../../config/auth";
 import '../../../config/yup';
 import { UnauthorizedError } from "../../../core/helpers/api.errors";
 import { validateData } from "../../../core/helpers/validate-data.dtos";
-import { CreateUserDTO } from "../../user/DTO/createUserDTO";
-import { UserService } from "../../user/services/UserServices";
+
+import { EmpresaService } from "../../empresa/services/EmpresaServices";
+import { PerfilService } from "../../perfil/services/PerfilServices";
+import { UsuarioService } from "../../user/services/UsuarioServices";
 import { SigninDTO } from "../DTO/SiginDTO";
+import { SignupDTO } from "../DTO/SignupDTO";
 // Definindo a interface para o usuário
-interface User {
+interface IUsuario {
   id: number;
-  role: object | string;
-  name: string;
-  email: string
+  perfilId: object | string;
+  nome: string;
+  email: string;
+  senha: string;
+  empresaid: number;
+
 
 }
 
 // Definindo a interface para o corpo da requisição
-interface LoginRequestBody {
+interface ILoginRequestBody {
   email: string;
-  password: string;
+  senha: string;
 }
 
 const prisma = new PrismaClient()
-const userService = new UserService(prisma)
+const usuarioService = new UsuarioService(prisma)
+const empresaService = new EmpresaService(prisma)
 class AuthController {
 
-  async sigup(req: Request, res: Response): Promise<Response> {
-    await validateData(req.body, CreateUserDTO);
-    const { email, password, name } = req.body;
+  async signup(req: Request, res: Response): Promise<Response> {
+    await validateData(req.body, SignupDTO);
+
+    const { email, senha, nome, perfilId } = req.body;
     const prisma = new PrismaClient()
-    const userService = new UserService(prisma)
+    const usuarioService = new UsuarioService(prisma)
+    const perfilService = new PerfilService(prisma)
 
-    const newUSer = await userService.create({ email, password, name });
+    const novoUsuario = await usuarioService.Signup(
+      {
+        email,
+        senha,
+        nome,
+        perfilId,
+      }, perfilService);
 
-    return res.status(201).json(newUSer);
+    return res.status(201).json(novoUsuario);
 
   }
 
@@ -45,23 +60,25 @@ class AuthController {
     // Validação do corpo da requisição
     await validateData(req.body, SigninDTO)
 
-    const { email, password } = req.body;
+    const { email, senha } = req.body;
 
     // validar as credenciais
-    const userValid = await userService.validateLogin(email, password);
+    const userValid = await usuarioService.validateLogin(email, senha);
 
     if (!userValid) {
-      throw new UnauthorizedError("usuarios ou password incorrectos!")
+      throw new UnauthorizedError("usuarios ou senha incorrectos!")
     }
 
-    const { id, name } = await userService.getByEmail(email)
+    const { id, nome, perfilId, empresaId } = await usuarioService.getByEmail(email)
 
     // Gerar o token JWT
     const token = jwt.sign(
       {
         id,
         email,
-        name
+        nome,
+        perfilId,
+        empresaId,
       },
       authConfig.secret,
       { expiresIn: authConfig.expiresIn }
@@ -69,7 +86,7 @@ class AuthController {
 
     // Retorna a resposta com os dados do usuário e o token
     return res.status(200).json({
-     token
+      token
     });
   }
 }

@@ -6,9 +6,11 @@ import path from "path";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocs from "./swaggerConfig";
 
+
 import { ErrorMiddleware } from "./middlewares/error.middleware";
 import { routes } from "./routes/routes.index";
 
+const isDevelopment = process.env.NODE_ENV === "DEVELOPMENT";
 class App {
     public server: Express;
 
@@ -37,17 +39,17 @@ class App {
         this.server.use("/files", express.static(UPLOAD_DIR));
         this.server.use("/public", express.static(PUBLIC_DIR));
     }
-
-    private routes(): void {
-        this.server.use("/v1", routes);
-    }
     setupSwagger() {
         this.server.use(
-            "/v1/api-docs", // URL para acessar a documentação
+            "/V1/api-docs", // URL para acessar a documentação
             swaggerUi.serve,
             swaggerUi.setup(swaggerDocs)
         );
-        console.log(`📚 Swagger disponível em http://localhost:4400/v1/api-docs`);
+        console.log(`📚 Swagger disponível em ${isDevelopment ?  "https://api.nextech/v1/api-docs":"http://localhost:4400/v1/api-docs"}`);
+    }
+
+    private routes(): void {
+        this.server.use("/v1", routes);
     }
     private exceptionError(): void {
         this.server.use(ErrorMiddleware);
