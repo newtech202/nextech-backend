@@ -19,12 +19,14 @@ class EmpresaController extends BaseController<Empresa> {
     }
 
     async create(req: Request, res: Response) {
+        const proprietarioId = Number(req.session?.id);
 
         const { nome, email, nif, telefone, endereco, regimeIvaId, logoURL, planoId } = req.body;
         const planoService = new PlanoService(this.prisma); // Create an instance of PlanoService
         const empresa = await this.empresaService.create({
             nome, email, nif, endereco, telefone, regimeIvaId, logoURL,
-            planoId
+            planoId,
+            proprietarioId
 
         },
             planoService);

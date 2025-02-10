@@ -20,6 +20,7 @@ export class EmpresaService extends BaseService<Empresa, PrismaClient> {
             planoId,
             telefone,
             regimeIvaId,
+            proprietarioId,
             logoURL
         } = data;
 
@@ -31,15 +32,18 @@ export class EmpresaService extends BaseService<Empresa, PrismaClient> {
         await this.ensureRecordExistsBy({ nif }, { haveToexist: false }, "Já existe uma empresa com este NIF.");
         await this.ensureRecordExistsBy({ nome }, { haveToexist: false }, "Já existe uma empresa com este nome.");
         await this.ensureRecordExistsBy({ telefone }, { haveToexist: false }, "Já existe uma empresa com este telefone.");
-        
-        // Verificar se nao existe um plano com referido id
-        const plano = await planoService.getById(planoId);
-        const novaEmpresa = await this.repository.create( {
+        await this.ensureRecordExistsBy({ proprietarioId }, { haveToexist: false }, "Já criou uma empresa.");
+
+        // Verificar se nao existe um plano com referido id. o metodo getById retorna um erro caso nao exista
+        await planoService.getById(planoId);
+
+        const novaEmpresa = await this.repository.create({
             email,
             endereco,
             nif,
             nome,
             telefone,
+            proprietarioId,
             logoURL,
             planoId,
 
