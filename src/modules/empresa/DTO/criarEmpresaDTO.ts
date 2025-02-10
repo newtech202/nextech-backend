@@ -8,6 +8,7 @@ export const CriarEmpresaDTO = Yup.object().shape({
     nif: Yup.string().required(),
     endereco: Yup.string().required(),
     planoId: Yup.number().required(),
+    proprietarioId: Yup.number().required(),
     telefone: Yup.string().required(),
     logoURL: Yup.string().nullable(), // O campo logoURL é opcional e pode ser nulo
     regimeIvaId: Yup.number().required('O regime de IVA é obrigatório.'),
