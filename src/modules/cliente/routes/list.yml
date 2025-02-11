@@ -1,0 +1,19 @@
+responses:
+  200:
+    description: Lista de usuários
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID do usuário
+              nome
+                type: string
+                description: Nome do usuário
+              email:
+                type: string
+                description: Email do usuário
