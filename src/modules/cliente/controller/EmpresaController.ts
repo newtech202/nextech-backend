@@ -33,7 +33,7 @@ class ClienteController extends BaseController<Cliente> {
             endereco,
             logoUrl,
             empresaId,
-            tipoId: 0,
+            tipoId: 1,
             registadoPor: (req.session as any).nome
         }, empresaService);
         return res.status(201).json(Cliente); // Retorna a Cliente criada
