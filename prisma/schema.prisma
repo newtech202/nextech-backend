@@ -124,6 +124,7 @@ model Empresa {
   usuario             Usuario[]
   endereco            String
   Categoria           Categoria[]           @relation(map: "Categoria_empresaId_fkey")
+  proprietarioId      Int
 
   @@index([planoId], map: "Empresa_planoId_fkey")
 }

@@ -2,7 +2,6 @@ import { Cliente, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import session from "express-session";
 import { BaseController } from "../../../core/controllers/base.controller";
-import { PlanoService } from "../../Plano/services/PlanoServices";
 
 import { EmpresaService } from "../../empresa/services/EmpresaServices";
 import { ActualizarClienteDTO } from "../DTO/actualizarClienteDTO";
@@ -21,11 +20,10 @@ class ClienteController extends BaseController<Cliente> {
 
     async create(req: Request, res: Response) {
         const empresaId = (req.session as any).empresaId;
-    
+
         const empresaService = new EmpresaService(this.prisma);
         const { nome, email, nif, telefone, endereco, regimeIvaId, logoUrl, planoId } = req.body;
-        const planoService = new PlanoService(this.prisma); // Create an instance of PlanoService
-        const Cliente = await this.ClienteService.create({
+        const cliente = await this.ClienteService.create({
             nome,
             email,
             nif,
@@ -36,14 +34,15 @@ class ClienteController extends BaseController<Cliente> {
             tipoId: 1,
             registadoPor: (req.session as any).nome
         }, empresaService);
-        return res.status(201).json(Cliente); // Retorna a Cliente criada
+        return res.status(201).json(cliente); // Retorna o Cliente criada
     }
 
-    async findExpensesByCompanyId(req: Request, res: Response) {
+    async findCompanyId(req: Request, res: Response) {
         (req as Request & { session: session.Session }).session
-        const userId = req.session?.id
+        const empresaId = req.session
+        const clientes = this.service.getOneBy({ empresaId })
 
-        return res.status(200).json({ userId });
+        return res.status(200).json(clientes);
     }
 }
 
