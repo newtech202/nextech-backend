@@ -38,16 +38,16 @@ export class ClienteService extends BaseService<Cliente, PrismaClient> {
             await this.ensureRecordExistsBy({ telefone }, { haveToexist: false }, "Já existe uma Cliente com este telefone.");
         }
 
-
         await empresaService.ensureRecordExistsBy({ id: empresaId }, { haveToexist: true }, "Empresa não encontrada.");
-        
+
         const novaCliente = await this.repository.create({
             email,
             endereco,
             nome,
             telefone,
             empresaId,
-            logoUrl,
+            logoUrl
+
 
         });
         return novaCliente;
