@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import auth from "../config/auth";
- declare module "express-serve-static-core" {
+declare module "express-serve-static-core" {
   interface Request {
     session?: Session;
   }
@@ -9,9 +9,10 @@ import auth from "../config/auth";
 // Definindo a tipagem para a sessão
 interface Session {
   id: string;
-  role: string;
+  perfilId: string;
   nome: string;
   email: string;
+  empresaId: string;
 }
 
 // Middleware para autenticação JWT
@@ -47,7 +48,7 @@ export default async (
     // Atribui os dados da sessão ao objeto req.sessao
     req.session = userSession;
     console.log(userSession);
-    
+
 
 
     return next();
