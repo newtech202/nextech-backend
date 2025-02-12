@@ -2,7 +2,6 @@ import { Cliente, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import session from "express-session";
 import { BaseController } from "../../../core/controllers/base.controller";
-
 import { EmpresaService } from "../../empresa/services/EmpresaServices";
 import { ActualizarClienteDTO } from "../DTO/actualizarClienteDTO";
 import { CriarClienteDTO } from "../DTO/criarClienteDTO";
@@ -20,9 +19,9 @@ class ClienteController extends BaseController<Cliente> {
 
     async create(req: Request, res: Response) {
         const empresaId = (req.session as any).empresaId;
-
+        const registadoPor = (req.session as any).nome;
         const empresaService = new EmpresaService(this.prisma);
-        const { nome, email, nif, telefone, endereco, regimeIvaId, logoUrl, planoId } = req.body;
+        const { nome, email, nif, telefone, endereco, logoUrl, tipoId } = req.body;
         const cliente = await this.ClienteService.create({
             nome,
             email,
@@ -31,8 +30,8 @@ class ClienteController extends BaseController<Cliente> {
             endereco,
             logoUrl,
             empresaId,
-            tipoId: 1,
-            registadoPor: (req.session as any).nome
+            tipoId,
+            registadoPor
         }, empresaService);
         return res.status(201).json(cliente); // Retorna o Cliente criada
     }

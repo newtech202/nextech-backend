@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express"; // Importando Request e Response explicitamente
+import ensureEmpresaIsSetupped from "../../../middlewares/ensureEmpresaIsSetupped.middleware";
 import ClienteController from "../controller/ClienteController";
 import { ClienteService } from "../services/ClienteServices";
 
@@ -17,7 +18,7 @@ const clienteController = new ClienteController(clienteService);
 // Criando o roteador
 const clienteRoutes = Router();
 
-clienteRoutes.post('/', async (req, res) => {
+clienteRoutes.post('/', ensureEmpresaIsSetupped, async (req, res) => {
     await clienteController.create(req, res)
 });
 

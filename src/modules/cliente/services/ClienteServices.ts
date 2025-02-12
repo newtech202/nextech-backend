@@ -10,8 +10,7 @@ export class ClienteService extends BaseService<Cliente, PrismaClient> {
         const clienteRepository = new ClienteRepository(prisma);
         super(clienteRepository);
     }
-
-    async create(data: CriarClienteDTOType, empresaService: EmpresaService): Promise<Cliente> {
+    async create(data: CriarClienteDTOType, empresaService: EmpresaService,): Promise<Cliente> {
         const {
             nome,
             email,
@@ -24,7 +23,9 @@ export class ClienteService extends BaseService<Cliente, PrismaClient> {
 
         // Validar os campos obrigatórios
         await validateData(data, CriarClienteDTO);
+        //VERIFICAR SE 
 
+        // Verificar se já existe um Cliente com o mesmo nome
         if (email) {
             await this.ensureRecordExistsBy({ email }, { haveToexist: false }, "Já existe uma Cliente com este email.");
         }
