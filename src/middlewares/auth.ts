@@ -44,13 +44,11 @@ export default async (
 
     // Tipando os dados decodificados do token
     const userSession: Session = decoded;
+    console.log("DADOS LOGADOS",decoded);
 
     // Atribui os dados da sessão ao objeto req.sessao
     req.session = userSession;
     console.log(userSession);
-
-
-
     return next();
   } catch (error) {
     return res.status(401).json({ error, authHeader });
