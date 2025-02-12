@@ -35,9 +35,9 @@ model TipoDeCliente {
 model Cliente {
   id               Int            @id @default(autoincrement())
   nome             String
-  telefone         String
-  email            String
-  endereco         String
+  telefone         String?
+  email            String?
+  endereco         String?
   empresaId        Int
   dataActualizacao DateTime?      @updatedAt
   dataCriacao      DateTime       @default(now())
