@@ -36,6 +36,5 @@ clienteRoutes.patch('/:id', async (req, res) => {
     await clienteController.update(req, res)
 });
 
-
 export { clienteRoutes };
 
