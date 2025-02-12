@@ -9,6 +9,7 @@ import { empresaRoutes } from "../modules/empresa/routes/empresaRoutes";
 import { fornecedorRoutes } from "../modules/forncedores/routes/FornecedorRoutes";
 import { perfilRoutes } from "../modules/perfil/routes/perfil.routes";
 import { planoRoutes } from "../modules/Plano/routes/plano.routes";
+import { tipoDeClienteRoutes } from "../modules/tipoDeCliente/routes/tipoDeCliente.routes";
 import { userRoutes } from "../modules/user/routes/userRoutes";
 
 const routes = Router()
@@ -28,5 +29,8 @@ routes.use('/categories', categoriaRoutes)
 routes.use('/expenses', despesaRoutes)
 routes.use('/reason-expenses', despesaMotivoRoutes)
 routes.use('/costumers', clienteRoutes)
+routes.use('/costumers-types', tipoDeClienteRoutes)
+
+
 export { routes };
 

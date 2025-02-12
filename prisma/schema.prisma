@@ -26,7 +26,7 @@ model Artigo {
 model TipoDeCliente {
   id               Int       @id @default(autoincrement())
   tipo             String    @unique
-  descricao        String
+   
   cliente          Cliente[]
   dataActualizacao DateTime? @updatedAt
   dataCriacao      DateTime  @default(now())
