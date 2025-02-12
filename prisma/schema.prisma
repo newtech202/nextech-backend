@@ -46,6 +46,7 @@ model Cliente {
   logoUrl          String?
   tipo             TipoDeCliente? @relation(fields: [tipoId], references: [id])
   tipoId           Int?           @default(1)
+  registadoPor    String?
 
   @@index([empresaId], map: "Cliente_empresaId_fkey")
 }
