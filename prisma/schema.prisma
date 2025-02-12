@@ -23,27 +23,39 @@ model Artigo {
   @@index([empresaId], map: "Artigo_empresaId_fkey")
 }
 
+model TipoDeCliente {
+  id               Int       @id @default(autoincrement())
+  tipo             String    @unique
+  descricao        String
+  cliente          Cliente[]
+  dataActualizacao DateTime? @updatedAt
+  dataCriacao      DateTime  @default(now())
+}
+
 model Cliente {
-  id          Int         @id @default(autoincrement())
-  nome        String
-  telefone    String
-  email       String
-  endereco    String
-  empresaId   Int
+  id               Int            @id @default(autoincrement())
+  nome             String
+  telefone         String
+  email            String
+  endereco         String
+  empresaId        Int
   dataActualizacao DateTime?      @updatedAt
-  dataCriacao DateTime    @default(now())
-  empresa     Empresa     @relation(fields: [empresaId], references: [id], map: "Cliente_empresaId_fkey")
-  documento   Documento[]
+  dataCriacao      DateTime       @default(now())
+  empresa          Empresa        @relation(fields: [empresaId], references: [id], map: "Cliente_empresaId_fkey")
+  documento        Documento[]
+  logoUrl          String?
+  tipo             TipoDeCliente? @relation(fields: [tipoId], references: [id])
+  tipoId           Int?           @default(1)
 
   @@index([empresaId], map: "Cliente_empresaId_fkey")
 }
 
 model DespesaMotivo {
-  id      Int       @id @default(autoincrement())
-  motivo  String    @unique
-  dataActualizacao DateTime?      @updatedAt
-  dataCriacao DateTime    @default(now())
-  Despesa Despesa[] @relation(map: "Despesa_motivoId_fkey")
+  id               Int       @id @default(autoincrement())
+  motivo           String    @unique
+  dataActualizacao DateTime? @updatedAt
+  dataCriacao      DateTime  @default(now())
+  Despesa          Despesa[] @relation(map: "Despesa_motivoId_fkey")
 }
 
 model Despesa {
@@ -56,21 +68,22 @@ model Despesa {
   motivoId         Int
   criadoPorId      Int
   empresaId        Int
-  dataActualizacao DateTime?      @updatedAt
+  dataActualizacao DateTime?     @updatedAt
   dataCriacao      DateTime      @default(now())
-  empresa    Empresa    @relation(fields: [empresaId], references: [id], map: "Despesa_empresaId_fkey")
-  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id], map: "Despesa_fornecedorId_fkey")
-  motivo DespesaMotivo @relation(fields: [motivoId], references: [id], map: "Despesa_motivoId_fkey")
+  empresa          Empresa       @relation(fields: [empresaId], references: [id], map: "Despesa_empresaId_fkey")
+  fornecedor       Fornecedor    @relation(fields: [fornecedorId], references: [id], map: "Despesa_fornecedorId_fkey")
+  motivo           DespesaMotivo @relation(fields: [motivoId], references: [id], map: "Despesa_motivoId_fkey")
+
   @@index([empresaId], map: "Despesa_empresaId_fkey")
   @@index([fornecedorId], map: "Despesa_fornecedorId_fkey")
   @@index([motivoId], map: "Despesa_motivoId_fkey")
 }
 
 model Documento {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   clienteId          Int
   empresaId          Int
-  dataEmissao        DateTime @default(now())
+  dataEmissao        DateTime  @default(now())
   produtoServicoId   Int
   precoUnitario      Float
   quantidade         Int
@@ -79,12 +92,12 @@ model Documento {
   impostosRetidos    Float
   total              Float
   descontoPercentual Float
-  dataActualizacao DateTime?      @updatedAt
-  dataCriacao        DateTime @default(now())
+  dataActualizacao   DateTime? @updatedAt
+  dataCriacao        DateTime  @default(now())
   criadoPor          String
-  cliente            Cliente  @relation(fields: [clienteId], references: [id], map: "Documento_clienteId_fkey")
-  empresa            Empresa  @relation(fields: [empresaId], references: [id], map: "Documento_empresaId_fkey")
-  artigo             Artigo   @relation(fields: [produtoServicoId], references: [id], map: "Documento_produtoServicoId_fkey")
+  cliente            Cliente   @relation(fields: [clienteId], references: [id], map: "Documento_clienteId_fkey")
+  empresa            Empresa   @relation(fields: [empresaId], references: [id], map: "Documento_empresaId_fkey")
+  artigo             Artigo    @relation(fields: [produtoServicoId], references: [id], map: "Documento_produtoServicoId_fkey")
 
   @@index([clienteId], map: "Documento_clienteId_fkey")
   @@index([empresaId], map: "Documento_empresaId_fkey")
@@ -94,7 +107,7 @@ model Documento {
 model Empresa {
   id                  Int                   @id @default(autoincrement())
   nome                String
-  dataActualizacao DateTime?      @updatedAt
+  dataActualizacao    DateTime?             @updatedAt
   dataCriacao         DateTime              @default(now())
   email               String
   logoURL             String?
@@ -111,23 +124,24 @@ model Empresa {
   usuario             Usuario[]
   endereco            String
   Categoria           Categoria[]           @relation(map: "Categoria_empresaId_fkey")
+  proprietarioId      Int
 
   @@index([planoId], map: "Empresa_planoId_fkey")
 }
 
 model Fornecedor {
-  id          Int       @id @default(autoincrement())
-  logo        String?
-  nome        String
-  nif         String    @unique(map: "Fornecedor_nif_key")
-  endereco    String
-  telefone    String
-  email       String
-  empresaId   Int
-  dataActualizacao DateTime?      @updatedAt
-  dataCriacao DateTime  @default(now())
-  despesa     Despesa[]
-  empresa     Empresa   @relation(fields: [empresaId], references: [id], map: "Fornecedor_empresaId_fkey")
+  id               Int       @id @default(autoincrement())
+  logo             String?
+  nome             String
+  nif              String    @unique(map: "Fornecedor_nif_key")
+  endereco         String
+  telefone         String
+  email            String
+  empresaId        Int
+  dataActualizacao DateTime? @updatedAt
+  dataCriacao      DateTime  @default(now())
+  despesa          Despesa[]
+  empresa          Empresa   @relation(fields: [empresaId], references: [id], map: "Fornecedor_empresaId_fkey")
 
   @@index([empresaId], map: "Fornecedor_empresaId_fkey")
 }
@@ -151,7 +165,7 @@ model Plano {
   nome                String
   valor               Float
   periodo             String
-  dataActualizacao DateTime?      @updatedAt
+  dataActualizacao    DateTime?             @updatedAt
   dataCriacao         DateTime              @default(now())
   empresa             Empresa[]
   pagamentoSubscricao PagamentoSubscricao[]
@@ -163,7 +177,7 @@ model Usuario {
   email             String    @unique(map: "Usuario_email_key")
   senha             String
   empresaId         Int?
-  dataActualizacao DateTime?      @updatedAt
+  dataActualizacao  DateTime? @updatedAt
   dataCriacao       DateTime  @default(now())
   perfilId          Int
   resetsenhaToken   String?   @unique

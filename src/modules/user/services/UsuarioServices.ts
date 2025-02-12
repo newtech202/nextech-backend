@@ -104,4 +104,13 @@ export class UsuarioService extends BaseService<Usuario, PrismaClient> {
     async askToUpdatesenha() {
 
     }
+
+    //vericar se o usuario logado tem empresaId
+    async verifyUserEmpresaId(usuarioId: number): Promise<boolean> {
+        const usuario = await this.repository.getOneBy({ id: usuarioId });
+        if (!usuario.empresaId) {
+            return false;
+        }
+        return true;
+    }
 }
