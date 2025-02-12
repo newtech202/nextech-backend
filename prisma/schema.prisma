@@ -35,9 +35,9 @@ model TipoDeCliente {
 model Cliente {
   id               Int            @id @default(autoincrement())
   nome             String
-  telefone         String
-  email            String
-  endereco         String
+  telefone         String?
+  email            String?
+  endereco         String?
   empresaId        Int
   dataActualizacao DateTime?      @updatedAt
   dataCriacao      DateTime       @default(now())
@@ -46,6 +46,7 @@ model Cliente {
   logoUrl          String?
   tipo             TipoDeCliente? @relation(fields: [tipoId], references: [id])
   tipoId           Int?           @default(1)
+  registadoPor    String?
 
   @@index([empresaId], map: "Cliente_empresaId_fkey")
 }

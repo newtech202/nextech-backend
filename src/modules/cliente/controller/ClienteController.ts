@@ -19,9 +19,12 @@ class ClienteController extends BaseController<Cliente> {
 
     async create(req: Request, res: Response) {
         const empresaId = (req.session as any).empresaId;
+        // verificar se o id da empresa está na sessão
+        this.service
+
         const registadoPor = (req.session as any).nome;
         const empresaService = new EmpresaService(this.prisma);
-        const { nome, email, nif, telefone, endereco, logoUrl, tipoId } = req.body;
+        const { nome, email="exemple@gmail.com", nif, telefone="999999999", endereco, logoUrl, tipoId } = req.body;
         const cliente = await this.ClienteService.create({
             nome,
             email,

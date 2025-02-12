@@ -12,12 +12,8 @@ export class ClienteService extends BaseService<Cliente, PrismaClient> {
     }
     async create(data: CriarClienteDTOType, empresaService: EmpresaService,): Promise<Cliente> {
         const {
-            nome,
             email,
-            endereco,
             nif,
-            telefone,
-            logoUrl,
             empresaId,
         } = data;
 
@@ -26,31 +22,19 @@ export class ClienteService extends BaseService<Cliente, PrismaClient> {
         //VERIFICAR SE 
 
         // Verificar se já existe um Cliente com o mesmo nome
-        if (email) {
-            await this.ensureRecordExistsBy({ email }, { haveToexist: false }, "Já existe uma Cliente com este email.");
-        }
+        // if (email) {
+        //     await this.ensureRecordExistsBy({ email }, { haveToexist: false }, "Já existe uma Cliente com este email.");
+        // }
         if (nif) {
             await this.ensureRecordExistsBy({ nif }, { haveToexist: false }, "Já existe uma Cliente com este NIF.");
         }
-
-        await this.ensureRecordExistsBy({ nome }, { haveToexist: false }, "Já existe uma Cliente com este nome.");
-
-        if (telefone) {
-            await this.ensureRecordExistsBy({ telefone }, { haveToexist: false }, "Já existe uma Cliente com este telefone.");
-        }
+        // if (telefone) {
+        //     await this.ensureRecordExistsBy({ telefone }, { haveToexist: false }, "Já existe uma Cliente com este telefone.");
+        // }
 
         await empresaService.ensureRecordExistsBy({ id: empresaId }, { haveToexist: true }, "Empresa não encontrada.");
 
-        const novaCliente = await this.repository.create({
-            email,
-            endereco,
-            nome,
-            telefone,
-            empresaId,
-            logoUrl
-
-
-        });
+        const novaCliente = await this.repository.create(data);
         return novaCliente;
     }
 
