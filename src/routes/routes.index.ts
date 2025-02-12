@@ -17,10 +17,10 @@ routes.use(async (req, res, next) => {
     await auth(req, res, next)
 });
 routes.use('/users', userRoutes)
-routes.use('/profiles', perfilRoutes)
 routes.use('/companies', empresaRoutes)
-routes.use('/planos', planoRoutes)
+routes.use('/plans', planoRoutes)
 routes.use('/suppliers', fornecedorRoutes)
+routes.use('/profiles', perfilRoutes)
 routes.use('/categories', categoriaRoutes)
 routes.use('/expenses', despesaRoutes)
 routes.use('/reason-expenses', despesaMotivoRoutes)
